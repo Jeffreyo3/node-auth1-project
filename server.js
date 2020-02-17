@@ -12,7 +12,7 @@ const sessionConfig = {
     name: 'userCookie',
     secret: 'secretsecretsarenofun',
     cookie: {
-        maxAge: 1000 * 60 * 60,
+        maxAge: 1000 * 60,
         secure: false,
         httpOnly: true
     },
@@ -66,7 +66,8 @@ server.post('/api/login', (req, res) => {
     const { username, password } = req.body;
 
     users.findUser(username)
-        .first()
+    // dont need first if login params are required to be unique by db
+        // .first()
         .then(user => {
             if (user && bcrypt.compareSync(password, user.password)) {
                 req.session.user = user;
