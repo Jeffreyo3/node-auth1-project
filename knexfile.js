@@ -14,6 +14,7 @@ module.exports = {
       afterCreate: (conn, done) => {
         conn.run('PRAGMA foregin_keys = ON', done)
       }
-    }
+    },
+    useNullAsDefault: true
   },
 };
