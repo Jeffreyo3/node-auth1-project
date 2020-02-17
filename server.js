@@ -2,20 +2,48 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const sessions = require('express-session');
 
 const server = express();
 const users = require('./data/models/usersModel');
 
+// Cookie config
+const sessionsConfig = {
+    name: 'userCookie',
+    secret: 'secretsecretsarenofun',
+    cookie: {
+        maxAge: 1000 * 60 * 60,
+        secure: false,
+        httpOnly: true
+    },
+    resave: false,
+    saveUninitialized: false
+}
+
 server.use(helmet());
 server.use(morgan('dev'));
 server.use(express.json());
+server.use(sessions(sessionsConfig));
+
+// Validation middleware
+function validateUser (req, res, next) {
+    if (req.sessions && res.sessions.user) {
+        next();
+    } else {
+        res.status(400).json({message: 'You shall not pass!'})
+    }
+}
 
 
+// Alive messages
 server.get('/', (req, res) => {
     res.send(`<h2>jeffreyo3's server is alive</h2>`);
 });
+server.get('/api', (req, res) => {
+    res.send(`<h2>jeffreyo3's api server is alive</h2>`);
+});
 
-
+// Register user, applying hash, requiring username & password
 server.post('/api/register', (req, res) => {
     const user = req.body;
 
@@ -32,6 +60,7 @@ server.post('/api/register', (req, res) => {
         })
 });
 
+// Login user requiring username & password. Check if password hashed matches stored hash
 server.post('/api/login', (req, res) => {
     const { username, password } = req.body;
 
@@ -46,7 +75,9 @@ server.post('/api/login', (req, res) => {
         })
 });
 
-server.get('/api/users', (req, res) => {
+// Let logged in user see list of all users (need validation middleware)
+server.get('/api/users', validateUser, (req, res) => {
+
     users.findUsers()
         .then(users => {
             res.status(200).json(users);
