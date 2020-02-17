@@ -2,13 +2,13 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const morgan = require('morgan');
 const helmet = require('helmet');
-const sessions = require('express-session');
+const session = require('express-session');
 
 const server = express();
 const users = require('./data/models/usersModel');
 
 // Cookie config
-const sessionsConfig = {
+const sessionConfig = {
     name: 'userCookie',
     secret: 'secretsecretsarenofun',
     cookie: {
@@ -23,14 +23,14 @@ const sessionsConfig = {
 server.use(helmet());
 server.use(morgan('dev'));
 server.use(express.json());
-server.use(sessions(sessionsConfig));
+server.use(session(sessionConfig));
 
 // Validation middleware
-function validateUser (req, res, next) {
-    if (req.sessions && res.sessions.user) {
+function validateUser(req, res, next) {
+    if (req.session && !!req.session.user) {
         next();
     } else {
-        res.status(400).json({message: 'You shall not pass!'})
+        res.status(400).json({ message: 'You shall not pass!' })
     }
 }
 
@@ -42,6 +42,7 @@ server.get('/', (req, res) => {
 server.get('/api', (req, res) => {
     res.send(`<h2>jeffreyo3's api server is alive</h2>`);
 });
+
 
 // Register user, applying hash, requiring username & password
 server.post('/api/register', (req, res) => {
@@ -68,6 +69,7 @@ server.post('/api/login', (req, res) => {
         .first()
         .then(user => {
             if (user && bcrypt.compareSync(password, user.password)) {
+                req.session.user = user;
                 res.status(200).json({ message: `Welcome ${user.username}!` });
             } else {
                 res.status(500).json({ error: err.message, message: username });
