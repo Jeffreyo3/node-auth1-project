@@ -19,9 +19,11 @@
   "homepage": "https://github.com/Jeffreyo3/node-auth1-project#readme",
   "dependencies": {
     "bcrypt": "^3.0.8",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "helmet": "^3.21.2",
-    "knex": "^0.20.9"
+    "knex": "^0.20.10",
+    "sqlite3": "^4.1.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"
